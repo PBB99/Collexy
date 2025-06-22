@@ -2,33 +2,31 @@ from db.db import get_connection
 from psycopg2 import OperationalError, IntegrityError, ProgrammingError
 import traceback
 from datetime import datetime
-from unique_keys import new_entry
+from unique_keys import *
+from hystory_prices import *
+
 def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION):
     try:
         conn=get_connection()
         cursor=conn.cursor()
-        cursor.execute("SELECT * FROM UNIQUE_KEYS WHERE TABLE_NAME='MY_PRODUCTS';")
-        result=cursor.fetchone()
-        id=result["next_id"]
+        id=get_unique_keys("MY_PRODUCTS")
         
-        query=""" 
+        if id is not None:
+            query=""" 
             INSERT INTO MY_PRODUCTS (ID,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION)
             VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s,%s);
         """
-        insert=cursor.execute(query, (id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
-        if  cursor.rowcount >0:
-            cursor.execute("SELECT * FROM UNIQUE_KEYS WHERE TABLE_NAME='HISTORY_PRICES';")
-            result=cursor.fetchone()
-            h_id=result["next_id"]
-            query2="""
+            cursor.execute(query, (id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
+            if  cursor.rowcount >0:
+                h_id=get_unique_keys("HISTORY_PRICES")
+                query2="""
             INSERT INTO HISTORY_PRICES values(%s,%s,%s,%s,%s,%s)
             """
-            cursor.execute(query2,(h_id,NAME,PRICE,datetime.now(),'',1))
-            if cursor.rowcount>0:
-                update_uk_hprice="UPDATE UNIQUE_KEYS SET NEXT_ID=NEXT_ID+1 where TABLE_NAME='HISTORY_PRICES';"
-                cursor.execute(update_uk_hprice,h_id)
+                cursor.execute(query2,(h_id,NAME,PRICE,datetime.now(),'',1))
                 if cursor.rowcount>0:
-                        new_entry("MY_PRODUCTS")
+                    update_uk_hprice=update_unique_keys("HISTORY_PRICES")
+                    if update_uk_hprice is not None:
+                        update_unique_keys("MY_PRODUCTS")
         conn.commit()
         cursor.close()
         conn.close()
@@ -37,13 +35,17 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
 
     except OperationalError as e:
         print(e,": There was an error inserting a new product1")
+        return None
     except IntegrityError as e:
         print(e,": There was an error inserting a new product2")
+        return None
     except ProgrammingError as e:
         print(e,": There was an error inserting a new product3")
+        return None
     except Exception as e:
         print(e,": There was an error inserting a new product4")
         traceback.print_exc()
+        return None
     
 
 
@@ -70,14 +72,18 @@ def update_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRI
         conn.close()    
         return 
     except OperationalError as e:
-        print(e,": There was an error inserting a new product1")
+        print(e,": There was an error inserting a new product")
+        return None
     except IntegrityError as e:
-        print(e,": There was an error inserting a new product2")
+        print(e,": There was an error inserting a new product")
+        return None
     except ProgrammingError as e:
-        print(e,": There was an error inserting a new product3")
+        print(e,": There was an error inserting a new product")
+        return None
     except Exception as e:
-        print(e,": There was an error inserting a new product4")
+        print(e,": There was an error inserting a new product")
         traceback.print_exc()
+        return None
 
 
 def delete_product(ID):
@@ -94,11 +100,15 @@ def delete_product(ID):
             print("No rows deleted")
         return
     except OperationalError as e:
-        print(e,": There was an error inserting a new product1")
+        print(e,": There was an error deleting a new product")
+        return None
     except IntegrityError as e:
-        print(e,": There was an error inserting a new product2")
+        print(e,": There was an error deleting a new product")
+        return None
     except ProgrammingError as e:
-        print(e,": There was an error inserting a new product3")
+        print(e,": There was an error deleting a new product")
+        return None
     except Exception as e:
-        print(e,": There was an error inserting a new product4")
-        traceback.print_exc()    
+        print(e,": There was an error deleting a new product")
+        traceback.print_exc()
+        return None    

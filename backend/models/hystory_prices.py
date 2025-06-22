@@ -2,14 +2,14 @@ from db.db import get_connection
 from psycopg2 import OperationalError, IntegrityError, ProgrammingError
 import traceback
 from datetime import datetime
+from unique_keys import *
 
-def new_entry(NAME,PRICE,SOURCE,PRODUCT_ID):
+def new_history_price(NAME,PRICE,SOURCE,PRODUCT_ID):
     try:
         conn=get_connection()
         cursor=conn.cursor()
-        cursor.execute("SELECT * FROM UNIQUE_KEYS WHERE TABLE_NAME='HISTORY_PRICES';")
-        result=cursor.fetchone()
-        h_id=result["next_id"]
+
+        h_id=get_unique_keys("HISTORY_PRICES")
         if h_id is not None:
             query="""
             INSERT INTO HISTORY_PRICES values(%s,%s,%s,%s,%s,%s)
@@ -22,11 +22,15 @@ def new_entry(NAME,PRICE,SOURCE,PRODUCT_ID):
         conn.close()
         return f"The product {PRODUCT_ID} price has been successfully saved in the history price table"
     except OperationalError as e:
-        print(e,": There was an error inserting a new product1")
+        print(e,": There was an error inserting a new hystoric price")
+        return None
     except IntegrityError as e:
-        print(e,": There was an error inserting a new product2")
+        print(e,": There was an error inserting a new hystoric price")
+        return None
     except ProgrammingError as e:
-        print(e,": There was an error inserting a new product3")
+        print(e,": There was an error inserting a new hystoric price")
+        return None
     except Exception as e:
-        print(e,": There was an error inserting a new product4")
-        traceback.print_exc()    
+        print(e,": There was an error inserting a new hystoric price")
+        traceback.print_exc()
+        return None    
