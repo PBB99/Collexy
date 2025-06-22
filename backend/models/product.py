@@ -2,6 +2,7 @@ from db.db import get_connection
 from psycopg2 import OperationalError, IntegrityError, ProgrammingError
 import traceback
 from datetime import datetime
+from unique_keys import new_entry
 def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION):
     try:
         conn=get_connection()
@@ -26,9 +27,8 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
             if cursor.rowcount>0:
                 update_uk_hprice="UPDATE UNIQUE_KEYS SET NEXT_ID=NEXT_ID+1 where TABLE_NAME='HISTORY_PRICES';"
                 cursor.execute(update_uk_hprice,h_id)
-                if insert is not None:
-                        update_uk_products="UPDATE UNIQUE_KEYS SET NEXT_ID=NEXT_ID+1 where TABLE_NAME='MY_PRODUCTS';"
-                        cursor.execute(update_uk_products,id)
+                if cursor.rowcount>0:
+                        new_entry("MY_PRODUCTS")
         conn.commit()
         cursor.close()
         conn.close()
