@@ -33,4 +33,30 @@ def new_history_price(NAME,PRICE,SOURCE,PRODUCT_ID):
     except Exception as e:
         print(e,": There was an error inserting a new hystoric price")
         traceback.print_exc()
-        return None    
+        return None
+    
+def get_history_price(product_id):
+    try:
+        conn=get_connection()
+        cursor=conn.cursor()
+        query="""
+        SELECT * FROM HISTORY_PRICES WHERE PRODUCT_ID=%s
+        """
+        cursor.execute(query,product_id)
+        if cursor.rowcount()>0:
+            list_results=cursor.fetchall()
+
+        return list_results
+    except OperationalError as e:
+        print(e,": There was an error inserting a new hystoric price")
+        return None
+    except IntegrityError as e:
+        print(e,": There was an error inserting a new hystoric price")
+        return None
+    except ProgrammingError as e:
+        print(e,": There was an error inserting a new hystoric price")
+        return None
+    except Exception as e:
+        print(e,": There was an error inserting a new hystoric price")
+        traceback.print_exc()
+        return None
