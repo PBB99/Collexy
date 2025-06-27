@@ -2,8 +2,8 @@ from db.db import get_connection
 from psycopg2 import OperationalError, IntegrityError, ProgrammingError
 import traceback
 from datetime import datetime
-from unique_keys import *
-from hystory_prices import *
+from models.unique_keys import *
+from models.hystory_prices import *
 
 def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION):
     try:
@@ -90,22 +90,24 @@ def get_product(ID):
         conn=get_connection()
         cursor=conn.cursor()
         query="""SELECT * FROM MY_PRODUCTS WHERE ID=%s"""
-        cursor.execute(query,id)
+        cursor.execute(query,(ID,))
         if cursor.rowcount>0:
-            my_product=cursor.fetchall()
+            my_product=cursor.fetchone()
             print("Prodcut information succesfully getted")
-        return my_product
+        cursor.close()
+        conn.close()
+        return dict(my_product)
     except OperationalError as e:
-        print(e,": There was an error deleting a new product")
+        print(e,": There was an error getting the product")
         return None
     except IntegrityError as e:
-        print(e,": There was an error deleting a new product")
+        print(e,": There was an error getting the product")
         return None
     except ProgrammingError as e:
-        print(e,": There was an error deleting a new product")
+        print(e,": There was an error getting the product")
         return None
     except Exception as e:
-        print(e,": There was an error deleting a new product")
+        print(e,": There was an error getting the product")
         traceback.print_exc()
         return None    
        
@@ -116,9 +118,9 @@ def delete_product(ID):
         query="""
         DELETE FROM MY_PRODUCTS WHERE ID=%s;
         """
-        cursor.execute(query,id)
+        cursor.execute(query,(ID,))
         if cursor.rowcount>0:
-            print("The product:",id," has been deleted")
+            print("The product:",ID," has been deleted")
         else:
             print("No rows deleted")
         return

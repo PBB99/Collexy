@@ -2,7 +2,7 @@ from db.db import get_connection
 from psycopg2 import OperationalError, IntegrityError, ProgrammingError
 import traceback
 from datetime import datetime
-from unique_keys import *
+from models.unique_keys import *
 
 def new_history_price(NAME,PRICE,SOURCE,PRODUCT_ID):
     try:

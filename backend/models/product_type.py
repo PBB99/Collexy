@@ -1,7 +1,7 @@
 from db.db import get_connection
 from psycopg2 import OperationalError, IntegrityError, ProgrammingError
 import traceback
-from unique_keys import *
+from models.unique_keys import *
 
 def new_product_type(NAME,DESCRIPTION):
     try:

@@ -2,8 +2,8 @@ from db.db import get_connection
 from psycopg2 import OperationalError, IntegrityError, ProgrammingError
 import traceback
 from datetime import datetime
-from unique_keys import *
-from hystory_prices import *
+from models.unique_keys import *
+from models.hystory_prices import *
 
 def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION):
     try:
