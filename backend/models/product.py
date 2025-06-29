@@ -53,26 +53,24 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
     
 
 
-def update_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRICE):
+def update_product(AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRICE,product_id):
     try:
         conn=get_connection()
         cursor=conn.cursor()
-        cursor.execute("SELECT * FROM MY_PRODUCTS WHERE NAME='%s' AND product_type_id=%s;",(NAME,PRODUCT_TYPE_ID))
-        result=cursor.fetchone()
-        id=result["id"]
-        if cursor.rowcount >0:
-            query_up="""
-                    UPDATE TABLE MY PRODUCTS SET
+        query_up="""
+                    UPDATE  MY_PRODUCTS SET
                     AMOUNT=%s,
                     STATUS=%s,
-                    GRRADED=%s,
+                    GRADED=%s,
                     PRICE=%s,
                     LAST_SOLD_PRICE=%s
                     where id=%s
                     """
-            cursor.execute(query_up,(AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRICE,id))
+        cursor.execute(query_up,(AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRICE,product_id))
+        if cursor.rowcount<=0:
+             raise ValueError("Error executing update")
         conn.commit()
-        return 
+        return f"Product with ID {product_id} updated successfully."
     except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error inserting a new product")
         return None

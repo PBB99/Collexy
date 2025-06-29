@@ -19,15 +19,23 @@ def get_products(product_id):
             "details": str(e)
         }), 500
     
-@product_bp.route("/",methods=["PUT"])
-def update_product(id):
+@product_bp.route("/<int:product_id>",methods=["PUT"])
+def update_petition_product(product_id):
     try:
-        data=request.json()
-        clean_data=DataSanitizer.sanitize_payload(data)
+        data=request.get_json()
+        
         if not data:
-            return jsonify({"error":"Error getting new data"}),200
+            return jsonify({
+                "error":"No input data provided"
+            }),400
+        
+        clean_data=DataSanitizer.sanitize_payload(data)
+        allowed_keys = ["AMOUNT", "STATUS", "GRADED", "PRICE", "LAST_SOLD_PRICE"]
+        filtered_data = {k: clean_data[k] for k in allowed_keys if k in clean_data}
+        filtered_data["product_id"]=product_id
+        
 
-        result=update_product(**clean_data)
+        result=update_product(**filtered_data)
         return jsonify({"message":result}),201
     except Exception as e:
         return jsonify({
