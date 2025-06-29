@@ -103,7 +103,27 @@ def get_product(ID):
         return None
     finally:
          cursor.close()
-         conn.close()  
+         conn.close() 
+def get_all_products():
+    try:
+        conn=get_connection()
+        cursor=conn.cursor()
+        query="""SELECT * FROM MY_PRODUCTS"""
+        cursor.execute(query)
+        if cursor.rowcount>0:
+            my_product=cursor.fetchall()
+            print("Prodcut information succesfully getted")
+        return my_product
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
+        print(e,": There was an error getting the product")
+        return None
+    except Exception as e:
+        print(e,": There was an error getting the product")
+        traceback.print_exc()
+        return None
+    finally:
+         cursor.close()
+         conn.close() 
        
 def delete_product(PRODUCT_ID):
     try:

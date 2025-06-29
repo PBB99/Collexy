@@ -12,4 +12,4 @@ app.register_blueprint(product_bp, url_prefix="/api/products")
 #app.register_blueprint(company_bp, url_prefix="/api/companies")
 
 if __name__ == "__main__":      # Si ejecutas este archivo directamente...
-    app.run(debug=True)         # Levanta el servidor en modo debug (te muestra errores, reinicia auto)
+    app.run(port=8000,debug=True)         # Levanta el servidor en modo debug (te muestra errores, reinicia auto)

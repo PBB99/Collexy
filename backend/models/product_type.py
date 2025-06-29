@@ -15,23 +15,25 @@ def new_product_type(NAME,DESCRIPTION):
             cursor.execute(query,(pt_id,NAME,DESCRIPTION))
             if cursor.rowcount()>0:
                 print(cursor.rowcount()," New rows inserted")
-            conn.commit()
-            cursor.close()
-            conn.close()
+            else:
+                raise ValueError("No row inserted")
+           
+        else:
+            raise ValueError("Error getting product type id")
+        
+
+        conn.commit()
         return f"The product type:{pt_id} has been succesfully inserted"
-    except OperationalError as e:
-        print(e,": There was an error inserting a new product type")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error inserting a new product type")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error inserting a new product type")
         return None
     except Exception as e:
         print(e,": There was an error inserting a new product type")
         traceback.print_exc()
         return None
+    finally:
+            cursor.close()
+            conn.close()
 
 def get_product_type(product_id,filter):
     try:
@@ -42,43 +44,39 @@ def get_product_type(product_id,filter):
         if cursor.rowcount()>0:
             print("Product type information getted succesfully")
             value=cursor.fetchone[filter]
-            
-        cursor.close()
-        conn.close()
+        else:
+            raise ValueError("Not product type id getted")
         return value
-    except OperationalError as e:
-        print(e,": There was an error inserting a new product type")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error inserting a new product type")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error inserting a new product type")
         return None
     except Exception as e:
         print(e,": There was an error inserting a new product type")
         traceback.print_exc()
-        return None    
+        return None
+    finally:
+        cursor.close()
+        conn.close()  
 
 def delete_product_type(product_id):
     try:    
         conn=get_connection()
         cursor=conn.cursor()
-        cursor.execute("Delete FROM PRODUCT_TYPE WHERE ID=%s",(product_id,))
+        if cursor.rowcount()>0:
+            cursor.execute("Delete FROM PRODUCT_TYPE WHERE ID=%s",(product_id,))
+        else:
+            raise ValueError("No rows deleted")
+        
         conn.commit()
-        cursor.close()
-        conn.close()
+
         return f"Product type {id} has been deleted"
-    except OperationalError as e:
-        print(e,": There was an error inserting a new product type")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error inserting a new product type")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error inserting a new product type")
         return None
     except Exception as e:
         print(e,": There was an error inserting a new product type")
         traceback.print_exc()
-        return None  
+        return None
+    finally:
+        cursor.close()
+        conn.close()

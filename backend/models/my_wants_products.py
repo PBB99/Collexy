@@ -11,7 +11,7 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
         cursor=conn.cursor()
         want_product_id=get_unique_keys("MY_WANTS_PRODUCTS")
         
-        if id is not None:
+        if want_product_id is not None:
             query=""" 
             INSERT INTO MY_WANTS_PRODUCTS (ID,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION)
             VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s,%s);
@@ -27,25 +27,24 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
                     update_uk_hprice=update_unique_keys("HISTORY_PRICES")
                     if update_uk_hprice is not None:
                         update_unique_keys("MY_WANTS_PRODUCTS")
+                    else:
+                        raise ValueError("Error updating Unique Keys")
+                else:
+                    raise ValueError("Error inserting history price for wanted product")
+        else:
+            raise ValueError("Error getting wanted product id")
         conn.commit()
-        cursor.close()
-        conn.close()
         return f"The product {want_product_id} has been successfully saved"
-
-
-    except OperationalError as e:
-        print(e,": There was an error inserting a new wanted product")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error inserting a new wanted product")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error inserting a new wanted product")
         return None
     except Exception as e:
         print(e,": There was an error inserting a new wanted product")
         traceback.print_exc()
         return None
+    finally:
+        cursor.close()
+        conn.close()
     
 
 
@@ -67,23 +66,20 @@ def update_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRI
                     where id=%s
                     """
             cursor.execute(query_up,(AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRICE,want_product_id))
-        cursor.close()
+        else:
+            raise ValueError("Error updating product: ",want_product_id)
         conn.commit()
-        conn.close()    
         return 
-    except OperationalError as e:
-        print(e,": There was an error inserting a new wanted product")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error inserting a new wanted product")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error inserting a new wanted product")
         return None
     except Exception as e:
         print(e,": There was an error inserting a new wanted product")
         traceback.print_exc()
         return None
+    finally:
+        cursor.close()
+        conn.close()
 
 def get_product(ID):
     try:
@@ -92,22 +88,44 @@ def get_product(ID):
         query="""SELECT * FROM MY_WANTS_PRODUCTS WHERE ID=%s"""
         cursor.execute(query,id)
         if cursor.rowcount>0:
-            my_product=cursor.fetchall()
+            my_product=cursor.fetchone()
             print("Prodcut information succesfully getted")
+        else:
+            raise ValueError("Product info not obtained")
         return my_product
-    except OperationalError as e:
-        print(e,": There was an error deleting a new wanted product")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error deleting a new wanted product")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error deleting a new wanted product")
         return None
     except Exception as e:
         print(e,": There was an error deleting a new wanted product")
         traceback.print_exc()
-        return None    
+        return None 
+    finally:
+        cursor.close()
+        conn.close() 
+        
+def get_all_products():
+    try:
+        conn=get_connection()
+        cursor=conn.cursor()
+        query="""SELECT * FROM MY_WANTS_PRODUCTS"""
+        cursor.execute(query,id)
+        if cursor.rowcount>0:
+            my_product=cursor.fetchall()
+            print("Prodcut information succesfully getted")
+        else:
+            raise ValueError("Product info not obtained")
+        return my_product
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
+        print(e,": There was an error deleting a new wanted product")
+        return None
+    except Exception as e:
+        print(e,": There was an error deleting a new wanted product")
+        traceback.print_exc()
+        return None 
+    finally:
+        cursor.close()
+        conn.close()  
        
 def delete_product(ID):
     try:
@@ -120,18 +138,15 @@ def delete_product(ID):
         if cursor.rowcount>0:
             print("The product:",ID," has been deleted")
         else:
-            print("No rows deleted")
+            raise ValueError("No rows deleted")
         return
-    except OperationalError as e:
-        print(e,": There was an error deleting a new wanted product")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error deleting a new wanted product")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error deleting a new wanted product")
         return None
     except Exception as e:
         print(e,": There was an error deleting a new wanted product")
         traceback.print_exc()
-        return None    
+        return None  
+    finally:
+        cursor.close()
+        conn.close()  
