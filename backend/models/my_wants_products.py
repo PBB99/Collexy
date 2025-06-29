@@ -9,14 +9,14 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
     try:
         conn=get_connection()
         cursor=conn.cursor()
-        id=get_unique_keys("MY_WANTS_PRODUCTS")
+        want_product_id=get_unique_keys("MY_WANTS_PRODUCTS")
         
         if id is not None:
             query=""" 
             INSERT INTO MY_WANTS_PRODUCTS (ID,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION)
             VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s,%s);
         """
-            cursor.execute(query, (id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
+            cursor.execute(query, (want_product_id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
             if  cursor.rowcount >0:
                 h_id=get_unique_keys("HISTORY_PRICES")
                 query2="""
@@ -30,7 +30,7 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
         conn.commit()
         cursor.close()
         conn.close()
-        return f"The product {id} has been successfully saved"
+        return f"The product {want_product_id} has been successfully saved"
 
 
     except OperationalError as e:
@@ -55,7 +55,7 @@ def update_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRI
         cursor=conn.cursor()
         cursor.execute("SELECT * FROM MY_WANTS_PRODUCTS WHERE NAME='%s' AND product_type_id=%s;",(NAME,PRODUCT_TYPE_ID))
         result=cursor.fetchone()
-        id=result["id"]
+        want_product_id=result["id"]
         if cursor.rowcount >0:
             query_up="""
                     UPDATE TABLE MY PRODUCTS SET
@@ -66,7 +66,7 @@ def update_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRI
                     LAST_SOLD_PRICE=%s
                     where id=%s
                     """
-            cursor.execute(query_up,(AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRICE,id))
+            cursor.execute(query_up,(AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRICE,want_product_id))
         cursor.close()
         conn.commit()
         conn.close()    
@@ -116,9 +116,9 @@ def delete_product(ID):
         query="""
         DELETE FROM MY_WANTS_PRODUCTS WHERE ID=%s;
         """
-        cursor.execute(query,id)
+        cursor.execute(query,(ID,))
         if cursor.rowcount>0:
-            print("The product:",id," has been deleted")
+            print("The product:",ID," has been deleted")
         else:
             print("No rows deleted")
         return

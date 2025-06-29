@@ -33,11 +33,11 @@ def new_product_type(NAME,DESCRIPTION):
         traceback.print_exc()
         return None
 
-def get_product_type(id,filter):
+def get_product_type(product_id,filter):
     try:
         conn=get_connection()
         cursor=conn.cursor()
-        cursor.execute("SELECT %s FROM PRODUCT_TYPE WHERE ID=%s",(filter,id))
+        cursor.execute("SELECT %s FROM PRODUCT_TYPE WHERE ID=%s",(filter,product_id))
         
         if cursor.rowcount()>0:
             print("Product type information getted succesfully")
@@ -60,11 +60,11 @@ def get_product_type(id,filter):
         traceback.print_exc()
         return None    
 
-def delete_product_type(id):
+def delete_product_type(product_id):
     try:    
         conn=get_connection()
         cursor=conn.cursor()
-        cursor.execute("Delete FROM PRODUCT_TYPE WHERE ID=%s",id)
+        cursor.execute("Delete FROM PRODUCT_TYPE WHERE ID=%s",(product_id,))
         conn.commit()
         cursor.close()
         conn.close()

@@ -42,7 +42,7 @@ def get_history_price(product_id):
         query="""
         SELECT * FROM HISTORY_PRICES WHERE PRODUCT_ID=%s
         """
-        cursor.execute(query,product_id)
+        cursor.execute(query,(product_id,))
         if cursor.rowcount()>0:
             list_results=cursor.fetchall()
 

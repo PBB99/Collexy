@@ -9,43 +9,47 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
     try:
         conn=get_connection()
         cursor=conn.cursor()
-        id=get_unique_keys("MY_PRODUCTS")
+        product_id=get_unique_keys("MY_PRODUCTS")
         
-        if id is not None:
-            query=""" 
+        if product_id is  None:
+            raise ValueError("Not product id getted from Unique Keys")
+        
+        query=""" 
             INSERT INTO MY_PRODUCTS (ID,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION)
             VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s,%s);
         """
-            cursor.execute(query, (id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
-            if  cursor.rowcount >0:
+        cursor.execute(query, (product_id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
+        if  cursor.rowcount >0:
                 h_id=get_unique_keys("HISTORY_PRICES")
-                query2="""
+                if h_id is None:
+                    raise ValueError("Not history price id getted from unique keys")
+        else:
+                raise ValueError("Product not inserted")
+                
+        query2="""
             INSERT INTO HISTORY_PRICES values(%s,%s,%s,%s,%s,%s)
             """
-                cursor.execute(query2,(h_id,NAME,PRICE,datetime.now(),'',1))
-                if cursor.rowcount>0:
+        cursor.execute(query2,(h_id,NAME,PRICE,datetime.now(),'',1))
+        if cursor.rowcount>0:
                     update_uk_hprice=update_unique_keys("HISTORY_PRICES")
-                    if update_uk_hprice is not None:
-                        update_unique_keys("MY_PRODUCTS")
+                    if update_uk_hprice is None:
+                        raise ValueError("History price primary key not updated")
+                    
+                    update_unique_keys("MY_PRODUCTS")
+        else:
+            raise ValueError("History Price not inserted")
         conn.commit()
-        cursor.close()
-        conn.close()
-        return f"The product {id} has been successfully saved"
-
-
-    except OperationalError as e:
+        return f"The product {product_id} has been successfully saved"
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error inserting a new product1")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error inserting a new product2")
-        return None
-    except ProgrammingError as e:
-        print(e,": There was an error inserting a new product3")
         return None
     except Exception as e:
         print(e,": There was an error inserting a new product4")
         traceback.print_exc()
         return None
+    finally:
+        cursor.close()
+        conn.close()
     
 
 
@@ -67,23 +71,18 @@ def update_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRI
                     where id=%s
                     """
             cursor.execute(query_up,(AMOUNT,STATUS,GRADED,PRICE,LAST_SOLD_PRICE,id))
-        cursor.close()
         conn.commit()
-        conn.close()    
         return 
-    except OperationalError as e:
-        print(e,": There was an error inserting a new product")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error inserting a new product")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error inserting a new product")
         return None
     except Exception as e:
         print(e,": There was an error inserting a new product")
         traceback.print_exc()
         return None
+    finally:
+         cursor.close()
+         conn.close()
 
 def get_product(ID):
     try:
@@ -94,46 +93,38 @@ def get_product(ID):
         if cursor.rowcount>0:
             my_product=cursor.fetchone()
             print("Prodcut information succesfully getted")
-        cursor.close()
-        conn.close()
         return dict(my_product)
-    except OperationalError as e:
-        print(e,": There was an error getting the product")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error getting the product")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error getting the product")
         return None
     except Exception as e:
         print(e,": There was an error getting the product")
         traceback.print_exc()
-        return None    
+        return None
+    finally:
+         cursor.close()
+         conn.close()  
        
-def delete_product(ID):
+def delete_product(PRODUCT_ID):
     try:
         conn=get_connection()
         cursor=conn.cursor()
         query="""
         DELETE FROM MY_PRODUCTS WHERE ID=%s;
         """
-        cursor.execute(query,(ID,))
+        cursor.execute(query,(PRODUCT_ID,))
         if cursor.rowcount>0:
-            print("The product:",ID," has been deleted")
+            print("The product:",PRODUCT_ID," has been deleted")
         else:
             print("No rows deleted")
         return
-    except OperationalError as e:
-        print(e,": There was an error deleting a new product")
-        return None
-    except IntegrityError as e:
-        print(e,": There was an error deleting a new product")
-        return None
-    except ProgrammingError as e:
+    except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error deleting a new product")
         return None
     except Exception as e:
         print(e,": There was an error deleting a new product")
         traceback.print_exc()
-        return None    
+        return None
+    finally:
+         cursor.close()
+         conn.close()  
