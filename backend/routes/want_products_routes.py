@@ -79,3 +79,18 @@ def getAll_wanted_products():
             "error": "Get all products failed",
             "details": str(e)
         }), 500
+
+@want_product_bp.route("/<int:want_product_id>",methods={"DELETE"})
+def delete_rt_product(want_product_id):
+    try:
+        deleted_product=delete_product(want_product_id)
+        if deleted_product is True:
+            return jsonify({
+                "message":"Not product deleted"
+            }),404     
+        return jsonify({"message":"product deleted"}),200
+    except Exception as e:
+        return jsonify({
+            "error": "Delete failed",
+            "details": str(e)
+        }), 500

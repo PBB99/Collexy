@@ -21,7 +21,7 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
         cursor.execute(query, (product_id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
         if  cursor.rowcount <0:
             raise ValueError("Product not inserted")               
-        hp_insert=new_history_price(NAME,PRICE,'',1)
+        hp_insert=new_history_price(NAME,PRICE,'',product_id)
         if hp_insert is None:
             raise ValueError("History Price not inserted")
         else:
@@ -121,14 +121,17 @@ def delete_product(PRODUCT_ID):
         conn=get_connection()
         cursor=conn.cursor()
         query="""
-        DELETE FROM MY_PRODUCTS WHERE ID=%s;
+        UPDATE MY_PRODUCTS
+        SET IS_ACTIVE = FALSE
+        WHERE ID = %s;
         """
         cursor.execute(query,(PRODUCT_ID,))
         if cursor.rowcount>0:
-            print("The product:",PRODUCT_ID," has been deleted")
+            print(f"The product:{PRODUCT_ID} has been deleted")
         else:
             print("No rows deleted")
-        return
+        conn.commit()
+        return f"{PRODUCT_ID} deleted"
     except (OperationalError,IntegrityError,ProgrammingError) as e:
         print(e,": There was an error deleting a new product")
         return None

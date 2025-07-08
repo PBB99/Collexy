@@ -21,7 +21,7 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
         cursor.execute(query, (want_product_id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
         if  cursor.rowcount <0:
                 raise ValueError("Product not inserted")  
-        hp_insert=new_history_price(NAME,PRICE,'',1)
+        hp_insert=new_history_price(NAME,PRICE,'',want_product_id)
                 
         if hp_insert is None:
                     raise ValueError("Error inserting history price for wanted product")
@@ -125,7 +125,9 @@ def delete_product(ID):
         conn=get_connection()
         cursor=conn.cursor()
         query="""
-        DELETE FROM MY_WANTS_PRODUCTS WHERE ID=%s;
+        UPDATE my_wants_products
+        SET IS_ACTIVE = FALSE
+        WHERE ID = %s;
         """
         cursor.execute(query,(ID,))
         if cursor.rowcount>0:
