@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify
-from models.product import new_product, get_product,update_product,delete_product,get_all_products
+from models.my_wants_products import *
 from utils.data_sanitizer import DataSanitizer
-product_bp = Blueprint("product", __name__)
+want_product_bp = Blueprint("want_product", __name__)
 
-@product_bp.route("/<int:product_id>", methods=["GET"])
-def get_product(product_id):
+@want_product_bp.route("/<int:wanted_product_id>", methods=["GET"])
+def get_wanted_product(wanted_product_id):
     try:
-        product= get_product(product_id)
+        product= get_product(wanted_product_id)
         if product:
             return jsonify(product),200
         else:
@@ -19,8 +19,8 @@ def get_product(product_id):
             "details": str(e)
         }), 500
     
-@product_bp.route("/<int:product_id>",methods=["PUT"])
-def update_petition_product(product_id):
+@want_product_bp.route("/<int:wanted_product_id>",methods=["PUT"])
+def update_petition_product(wanted_product_id):
     try:
         data=request.get_json()
         
@@ -32,7 +32,7 @@ def update_petition_product(product_id):
         clean_data=DataSanitizer.sanitize_payload(data)
         allowed_keys = ["AMOUNT", "STATUS", "GRADED", "PRICE", "LAST_SOLD_PRICE"]
         filtered_data = {k: clean_data[k] for k in allowed_keys if k in clean_data}
-        filtered_data["product_id"]=product_id
+        filtered_data["wanted_product_id"]=wanted_product_id
         
 
         result=update_product(**filtered_data)
@@ -43,7 +43,7 @@ def update_petition_product(product_id):
         }),500
 
 
-@product_bp.route("/", methods=["POST"])
+@want_product_bp.route("/", methods=["POST"])
 def create_product():
     try:
         data=request.get_json()
@@ -66,8 +66,8 @@ def create_product():
             "details": str(e)
         }), 500
     
-@product_bp.route("/", methods=["GET"])
-def getAll_products():
+@want_product_bp.route("/", methods=["GET"])
+def getAll_wanted_products():
     try:
         products = get_all_products()  
         if products:

@@ -19,25 +19,18 @@ def new_product(NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRI
             VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s,%s);
         """
         cursor.execute(query, (product_id,NAME,PRODUCT_TYPE_ID,AMOUNT,STATUS,GRADED,GRADING_COMPANY_ID,PRICE,LAST_SOLD_PRICE,URL,DESCRIPTION))
-        if  cursor.rowcount >0:
-                h_id=get_unique_keys("HISTORY_PRICES")
-                if h_id is None:
-                    raise ValueError("Not history price id getted from unique keys")
+        if  cursor.rowcount <0:
+            raise ValueError("Product not inserted")               
+        hp_insert=new_history_price(NAME,PRICE,'',1)
+        if hp_insert is None:
+            raise ValueError("History Price not inserted")
         else:
-                raise ValueError("Product not inserted")
-                
-        query2="""
-            INSERT INTO HISTORY_PRICES values(%s,%s,%s,%s,%s,%s)
-            """
-        cursor.execute(query2,(h_id,NAME,PRICE,datetime.now(),'',1))
-        if cursor.rowcount>0:
-                    update_uk_hprice=update_unique_keys("HISTORY_PRICES")
-                    if update_uk_hprice is None:
+                update_uk_hprice=update_unique_keys("HISTORY_PRICES")
+                if update_uk_hprice is None:
                         raise ValueError("History price primary key not updated")
                     
-                    update_unique_keys("MY_PRODUCTS")
-        else:
-            raise ValueError("History Price not inserted")
+                else:
+                     update_unique_keys("MY_PRODUCTS")
         conn.commit()
         return f"The product {product_id} has been successfully saved"
     except (OperationalError,IntegrityError,ProgrammingError) as e:
