@@ -35,11 +35,11 @@ def new_product_type(NAME,DESCRIPTION):
             cursor.close()
             conn.close()
 
-def get_product_type(product_id,filter):
+def get_product_type(filter):
     try:
         conn=get_connection()
         cursor=conn.cursor()
-        cursor.execute("SELECT %s FROM PRODUCT_TYPE WHERE ID=%s",(filter,product_id))
+        cursor.execute("SELECT %s FROM PRODUCT_TYPE WHERE ID=%s",(filter))
         
         if cursor.rowcount()>0:
             print("Product type information getted succesfully")
